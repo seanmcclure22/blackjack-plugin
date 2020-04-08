@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.blackjack;
+package com.blackjack;
 
 public enum BlackjackRenderStyle
 {

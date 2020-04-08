@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.blackjack;
+package com.blackjack;
 
 import net.runelite.api.Client;
 import net.runelite.api.NPC;

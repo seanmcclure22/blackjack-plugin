@@ -1,4 +1,4 @@
-package net.runelite.client.plugins.blackjack;
+package com.blackjack;
 
 import com.google.inject.Provides;
 import lombok.AccessLevel;
