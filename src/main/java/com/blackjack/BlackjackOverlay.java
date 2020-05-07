@@ -1,5 +1,6 @@
 package com.blackjack;
 
+import lombok.SneakyThrows;
 import net.runelite.api.Point;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -8,6 +9,8 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.util.Text;
+
+import java.text.SimpleDateFormat;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -30,7 +33,8 @@ public class BlackjackOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         for (NPC npc : plugin.getHighlightedNpcs())
         {
-            renderNpcOverlay(graphics, npc, plugin.getHighlightColor());
+            Color color = plugin.getHighlightColor();
+            renderNpcOverlay(graphics, npc, color);
         }
         return null;
     }
@@ -55,7 +59,7 @@ public class BlackjackOverlay extends Overlay {
 
             case HULL:
                 Shape objectClickbox = actor.getConvexHull();
-
+                //client.addChatMessage(ChatMessageType.CONSOLE, "DEBUG", color.toString(), "");
                 renderPoly(graphics, color, objectClickbox);
                 break;
         }
@@ -67,6 +71,7 @@ public class BlackjackOverlay extends Overlay {
 
             if (textLocation != null)
             {
+                //client.addChatMessage(ChatMessageType.CONSOLE, "DEBUG", plugin.statusText(), "");
                 OverlayUtil.renderTextLocation(graphics, textLocation, plugin.statusText(), color);
             }
         }

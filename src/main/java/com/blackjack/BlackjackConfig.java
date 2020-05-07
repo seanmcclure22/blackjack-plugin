@@ -46,11 +46,20 @@ public interface BlackjackConfig extends Config {
 	)
 	default Color knockedOutStateColor() {return Color.GREEN;}
 
+
+	@ConfigItem(
+			keyName = "aggressiveStateColor",
+			name = "NPC Aggressive State Color",
+			description = "Change the color of the aggressive state highlight",
+			position = 5
+	)
+	default Color aggressiveStateColor() {return Color.RED;}
+
 	@ConfigItem(
 			keyName = "statusText",
 			name = "Draw status text above NPCs",
 			description = "Configures whether or not to write if the target NPC is awake or knocked out",
-			position = 5
+			position = 6
 	)
 	default boolean statusText()
 	{
