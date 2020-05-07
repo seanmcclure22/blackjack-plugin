@@ -1,6 +1,5 @@
 package com.blackjack;
 
-import lombok.SneakyThrows;
 import net.runelite.api.Point;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -9,8 +8,6 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.util.Text;
-
-import java.text.SimpleDateFormat;
 
 import javax.inject.Inject;
 import java.awt.*;
