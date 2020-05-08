@@ -55,7 +55,6 @@ public class BlackjackOverlay extends Overlay {
 
             case HULL:
                 Shape objectClickbox = actor.getConvexHull();
-
                 renderPoly(graphics, color, objectClickbox);
                 break;
         }

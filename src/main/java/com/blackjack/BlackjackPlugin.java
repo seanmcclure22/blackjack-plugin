@@ -18,16 +18,18 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.WildcardMatcher;
 import javax.inject.Inject;
 import java.awt.Color;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @PluginDescriptor(
 		name = "Blackjack",
-		description = "Help show whether a blackjack target is knocked out or not",
+		description = "Help show whether a blackjack target is awaken, knocked out or aggressive.",
 		tags = {"blackjack", "thieve", "thieving"}
 )
 public class BlackjackPlugin extends Plugin {
 	private static final String SUCCESS_BLACKJACK = "You smack the bandit over the head and render them unconscious.";
+	private static final String FAILED_BLACKJACK = "Your blow only glances off the bandit's head.";
+	private static final String SUCCESS_PICKPOCKET = "You pick the Menaphite's pocket.";
+	private static final String FAILED_PICKPOCKET = "You fail to pick the Menaphite's pocket.";
 
 	@Inject
 	private BlackjackConfig blackjackConfig;
@@ -51,10 +53,10 @@ public class BlackjackPlugin extends Plugin {
 	private final Set<NPC> highlightedNpcs = new HashSet<>();
 
 	/**
-	 * Stores state of if NPC is knocked out or not.
+	 * Stores state of if blackjack NPC: Awaken, Knocked Out or Aggressive.
 	 */
 	@Getter(AccessLevel.PACKAGE)
-	private boolean knockedOut = false;
+	private BlackjackNPCState npcState = BlackjackNPCState.AWAKEN;
 
 	private String highlight = "";
 	private long nextKnockOutTick = 0;
@@ -132,9 +134,9 @@ public class BlackjackPlugin extends Plugin {
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
-		if (client.getTickCount() >= nextKnockOutTick)
+		if (client.getTickCount() >= nextKnockOutTick && npcState != BlackjackNPCState.AGGRESSIVE)
 		{
-			knockedOut = false;
+			npcState = BlackjackNPCState.AWAKEN;
 		}
 	}
 
@@ -143,15 +145,37 @@ public class BlackjackPlugin extends Plugin {
 	{
 		final String msg = event.getMessage();
 
-		if (event.getType() == ChatMessageType.SPAM && msg.equals(SUCCESS_BLACKJACK))
+		if (event.getType() == ChatMessageType.SPAM)
 		{
-			knockedOut = true;
-			nextKnockOutTick = client.getTickCount() + 4;
+			switch (msg) {
+				case SUCCESS_BLACKJACK:
+					npcState = BlackjackNPCState.KNOCKED_OUT;
+					nextKnockOutTick = client.getTickCount() + 4;
+					break;
+				case FAILED_BLACKJACK:
+					npcState = BlackjackNPCState.AGGRESSIVE;
+					break;
+				case SUCCESS_PICKPOCKET:
+				case FAILED_PICKPOCKET:
+					npcState = BlackjackNPCState.AWAKEN;
+				default:
+					break;
+			}
 		}
 	}
 
-	public Color getHighlightColor() {
-		return knockedOut ? blackjackConfig.knockedOutStateColor() : blackjackConfig.awakeStateColor();
+	public Color getHighlightColor() throws IllegalStateException {
+		switch (npcState)
+		{
+			case KNOCKED_OUT:
+				return blackjackConfig.knockedOutStateColor();
+			case AWAKEN:
+				return blackjackConfig.awakeStateColor();
+			case AGGRESSIVE:
+				return blackjackConfig.aggressiveStateColor();
+			default:
+				throw new IllegalStateException("Unexpected value: " + blackjackConfig.npcToBlackjack());
+		}
 	}
 
 	private String npcToHighlight()
@@ -178,25 +202,19 @@ public class BlackjackPlugin extends Plugin {
 			return;
 		}
 
-		outer:
 		for (NPC npc : client.getNpcs())
 		{
 			final String npcName = npc.getName();
 
-			if (npcName == null)
-			{
-				continue;
-			}
-
-			if (WildcardMatcher.matches(highlight, npcName))
+			if (npcName != null && WildcardMatcher.matches(highlight, npcName))
 			{
 				highlightedNpcs.add(npc);
-				continue outer;
 			}
 		}
 	}
 
-	public String statusText() {
-		return isKnockedOut() ? "Knocked-out" : "Awake";
+	public String statusText()
+	{
+		return npcState.getDisplayName();
 	}
 }
