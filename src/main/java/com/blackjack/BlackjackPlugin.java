@@ -22,14 +22,14 @@ import java.util.*;
 
 @PluginDescriptor(
 		name = "Blackjack",
-		description = "Help show whether a blackjack target is knocked out or not and aggressive or not",
+		description = "Help show whether a blackjack target is awaken, knocked out or aggressive.",
 		tags = {"blackjack", "thieve", "thieving"}
 )
 public class BlackjackPlugin extends Plugin {
 	private static final String SUCCESS_BLACKJACK = "You smack the bandit over the head and render them unconscious.";
-	private static final String FAIL_BLACKJACK = "Your blow only glances off the bandit's head.";
+	private static final String FAILED_BLACKJACK = "Your blow only glances off the bandit's head.";
 	private static final String SUCCESS_PICKPOCKET = "You pick the Menaphite's pocket.";
-	private static final String FAIL_PICKPOCKET = "You fail to pick the Menaphite's pocket.";
+	private static final String FAILED_PICKPOCKET = "You fail to pick the Menaphite's pocket.";
 
 	@Inject
 	private BlackjackConfig blackjackConfig;
@@ -53,15 +53,13 @@ public class BlackjackPlugin extends Plugin {
 	private final Set<NPC> highlightedNpcs = new HashSet<>();
 
 	/**
-	 * Stores state of if NPC is knocked out or not.
+	 * Stores state of if blackjack NPC: Awaken, Knocked Out or Aggressive.
 	 */
 	@Getter(AccessLevel.PACKAGE)
 	private BlackjackNPCState npcState = BlackjackNPCState.AWAKEN;
 
 	private String highlight = "";
 	private long nextKnockOutTick = 0;
-
-	private Map<BlackjackNPCState, String> statusTexts;
 
 	@Provides
 	BlackjackConfig provideConfig(ConfigManager configManager)
@@ -72,12 +70,6 @@ public class BlackjackPlugin extends Plugin {
 	@Override
 	protected void startUp() throws Exception
 	{
-		statusTexts = new HashMap<BlackjackNPCState, String>() {{
-			put(BlackjackNPCState.KNOCKED_OUT, 	"Knocked Out");
-			put(BlackjackNPCState.AGGRESSIVE, 	"Aggressive");
-			put(BlackjackNPCState.AWAKEN, 		"Awaken");
-		}};
-
 		overlayManager.add(blackjackOverlay);
 		highlight = npcToHighlight();
 		clientThread.invoke(() ->
@@ -160,11 +152,11 @@ public class BlackjackPlugin extends Plugin {
 					npcState = BlackjackNPCState.KNOCKED_OUT;
 					nextKnockOutTick = client.getTickCount() + 4;
 					break;
-				case FAIL_BLACKJACK:
+				case FAILED_BLACKJACK:
 					npcState = BlackjackNPCState.AGGRESSIVE;
 					break;
 				case SUCCESS_PICKPOCKET:
-				case FAIL_PICKPOCKET:
+				case FAILED_PICKPOCKET:
 					npcState = BlackjackNPCState.AWAKEN;
 				default:
 					break;
@@ -210,26 +202,19 @@ public class BlackjackPlugin extends Plugin {
 			return;
 		}
 
-		outer:
 		for (NPC npc : client.getNpcs())
 		{
 			final String npcName = npc.getName();
 
-			if (npcName == null)
-			{
-				continue;
-			}
-
-			if (WildcardMatcher.matches(highlight, npcName))
+			if (npcName != null && WildcardMatcher.matches(highlight, npcName))
 			{
 				highlightedNpcs.add(npc);
-				continue outer;
 			}
 		}
 	}
 
 	public String statusText()
 	{
-		return statusTexts.get(npcState);
+		return npcState.getDisplayName();
 	}
 }

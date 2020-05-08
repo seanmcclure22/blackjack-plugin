@@ -30,8 +30,7 @@ public class BlackjackOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         for (NPC npc : plugin.getHighlightedNpcs())
         {
-            Color color = plugin.getHighlightColor();
-            renderNpcOverlay(graphics, npc, color);
+            renderNpcOverlay(graphics, npc, plugin.getHighlightColor());
         }
         return null;
     }
@@ -56,7 +55,6 @@ public class BlackjackOverlay extends Overlay {
 
             case HULL:
                 Shape objectClickbox = actor.getConvexHull();
-                //client.addChatMessage(ChatMessageType.CONSOLE, "DEBUG", color.toString(), "");
                 renderPoly(graphics, color, objectClickbox);
                 break;
         }
@@ -68,7 +66,6 @@ public class BlackjackOverlay extends Overlay {
 
             if (textLocation != null)
             {
-                //client.addChatMessage(ChatMessageType.CONSOLE, "DEBUG", plugin.statusText(), "");
                 OverlayUtil.renderTextLocation(graphics, textLocation, plugin.statusText(), color);
             }
         }
